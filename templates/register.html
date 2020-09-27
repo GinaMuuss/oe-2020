@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
+
+<head>
+	<title>Orientierungseinheit 2020</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+	<style>
+		.content {
+			margin: 0px auto;
+			max-width: 1300px;
+		}
+	</style>
+</head>
+
+<body>
+	{% if(saved) %}
+	<div class="alert alert-success" role="alert">
+		Daten gespeichert
+	</div>
+	{% endif %}
+	{% if(notsaved) %}
+	<div class="alert alert-danger" role="alert">
+		Email adresse nicht valide oder der Datenverarbeitung wurde nicht zugestimmt.
+	</div>
+	{% endif %}
+
+	<div style="min-height: 20px;"></div>
+	<div class="content">
+		<h1>Registierung zur OE</h1>
+		Hallo, du m&ouml;chtest dich also zu unserer OE dieses Jahr registieren.
+		Die Daten hier werden nur erfasst, damit wir dir Infos zur OE schicken k&ouml;nnen und nach der OE werden Sie
+		direkt
+		wieder gel&ouml;scht. Sollte das f&uuml;r dich ein Problem darstellen melde dich bitte bei uns.
+		<form action="/register" method="post">
+			<div class="form-group">
+				<label for="email">E-Mail Adresse</label>
+				<input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+			</div>
+			<div class="form-group">
+				<label for="token">Registierungstoken</label>
+				<input type="string" class="form-control" id="token" aria-describedby="tokenHelp"
+					placeholder="Enter token" name="token">
+				<small id="tokenHelp" class="form-text text-muted">Dieser Token steht auf dem Brief, den du von uns
+					erhalten hast. Solltest du keinen haben schreib uns bitte eine E-Mail.</small>
+			</div>
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" id="check_consent" name="check_consent"> Ich stimme zu, dass meine Daten f&uuml;r die OE
+					verarbeitet werden.
+				</label>
+			</div>
+			<button type="submit" class="btn btn-primary">Absenden</button>
+		</form>
+	</div>
+</body>
+
+</html>
