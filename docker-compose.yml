@@ -1,16 +1,17 @@
 oe-landingpage: # Online Anweisungen für Dozenten für VLU. vlu-lecturer.fachschaft.info
-    build: oe-landingpage
-    image: oe-landingpage
+    build: .
+    #image: oe-landingpage
+    ports:
+      - 5000:5000
     container_name: oe-landingpage
-    network_mode: bridge
     restart: always
     volumes:
       - ${PWD}/oe-landingpage:/app/db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=5000"
-      - "traefik.frontend.rule=Host:oe.fachschaft.info"
+    #labels:
+    #  - "traefik.enable=true"
+    #  - "traefik.port=5000"
+    #  - "traefik.frontend.rule=Host:oe.fachschaft.info"
     environment:
       - REGISTER_TOKEN=TestToken
-      - EMAIL_FILE_PATH=/app/db/email_file.txt
+      - DATA_FILE_PATH=/app/db/
       - SUPPORT_EMAIL=Email@example.com
