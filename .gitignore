@@ -4,3 +4,5 @@ oe-landingpage/email_file.txt
 oe-landingpage/communication_link_path.txt
 oe-landingpage/groups.json
 oe-landingpage/quiz.json
+.env
+

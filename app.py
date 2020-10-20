@@ -197,24 +197,28 @@ class Group(Resource):
             answer = request.form["answer"]
             question = quiz.get_active_question()
             if len(question) == 0:
-                return make_response("No question is being played", 400)
+                q = quiz.get_active_question()
+                return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="No question is being played"), 200)
             question = question[0]
             if answer not in question.answers:
-                return make_response("Invalid answer", 400)
+                q = quiz.get_active_question()
+                return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="Invalid answer"), 200)
             group.answers[question.access_hash] = answer
-            return make_response("OK, name changed", 200)
+            q = quiz.get_active_question()
+            return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Answer saved"), 200)
         if "group_name" in request.form:
             name = request.form["group_name"]
             groups[access_hash].name = name
-            return make_response("OK, name changed", 200)
+            q = quiz.get_active_question()
+            return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Name saved"), 200)
         return make_response("Missing parameter", 400)
 
 api.add_resource(Group, "/group/<string:access_hash>")
 
 
 @app.route("/api/mail", methods=["POST"])
+@auth.login_required
 def send_mails():
-    print(pathlib.Path().absolute())
     templateLoader = jinja2.FileSystemLoader(pathlib.Path().absolute())
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template(template_path)
@@ -382,7 +386,6 @@ def admin():
 
 
 @app.route("/question")
-@auth.login_required
 def overlay_question():
     q = quiz.get_active_question()
     if len(q) > 0:
