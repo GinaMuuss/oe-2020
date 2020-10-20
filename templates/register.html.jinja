@@ -1,19 +1,7 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
+{% extends "layout.html.jinja" %}
 
-<head>
-	<title>Orientierungseinheit 2020</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-		integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
-	<style>
-		.content {
-			margin: 0px auto;
-			max-width: 1300px;
-		}
-	</style>
-</head>
+{% block content %}
 
-<body>
 	{% if(saved) %}
 	<div class="alert alert-success" role="alert">
 		Daten gespeichert
@@ -53,6 +41,4 @@
 			<button type="submit" class="btn btn-primary">Absenden</button>
 		</form>
 	</div>
-</body>
-
-</html>
+{% endblock %}
