@@ -20,4 +20,5 @@ oe-landingpage: # Online Anweisungen für Dozenten für VLU. vlu-lecturer.fachsc
       MAIL_SMTP_SERVER: "${MAIL_SMTP_SERVER}"
       MAIL_SMTP_SERVER_PORT: "${MAIL_SMTP_SERVER_PORT}"
       MAIL_SUBJECT: "${MAIL_SUBJECT}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
       

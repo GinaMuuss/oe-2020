@@ -3,7 +3,6 @@ import os
 import json
 import random
 import smtplib, ssl
-import requests
 import pathlib
 import uuid
 
@@ -17,7 +16,7 @@ from typing import Dict
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from werkzeug.security import generate_password_hash, check_password_hash
-import  jinja2 
+import jinja2 
 
 
 app = Flask(__name__)
