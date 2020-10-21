@@ -327,6 +327,11 @@ def load_quiz_from_disk():
     if os.path.isfile(quiz_path):
         with open(quiz_path, "r") as f:
             quiz = QuizDao(**json.load(f))
+            if quiz == None:
+                raise Exception(f"Quiz {quiz_path} not loaded correctly")
+
+    else:
+        raise Exception(f"Quiz {quiz_path} not found")
     
 
 
