@@ -416,7 +416,7 @@ def scoreboard():
                 p += 1
         points.append((group.name, p))
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("scoreboard.html.jinja", points=list(sorted(points, key=lambda x: x[1]))), 200, headers)
+    return make_response(render_template("scoreboard.html.jinja", points=list(sorted(points, key=lambda x: x[1], reverse=True))), 200, headers)
 
 
 ### --------------- Main --------------- ### 
