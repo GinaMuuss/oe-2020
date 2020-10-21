@@ -97,7 +97,7 @@ def verify_password(username, password):
 def return404(e):
     headers = {"Content-Type": "text/html"}
     return make_response(
-        render_template("404.html.jinja", support_mail_address=support_mail_address), 200, headers
+        render_template("404.html", support_mail_address=support_mail_address), 200, headers
     )
 
 
@@ -182,7 +182,7 @@ class Group(Resource):
         """
         if access_hash in groups:
             q = quiz.get_active_question()
-            return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None), 200)
+            return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None), 200)
         return make_response("Invalid access hash", 403)
 
     def post(self, access_hash):
@@ -198,19 +198,19 @@ class Group(Resource):
             question = quiz.get_active_question()
             if len(question) == 0:
                 q = quiz.get_active_question()
-                return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="No question is being played"), 200)
+                return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="No question is being played"), 200)
             question = question[0]
             if answer not in question.answers:
                 q = quiz.get_active_question()
-                return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="Invalid answer"), 200)
+                return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="Invalid answer"), 200)
             group.answers[question.access_hash] = answer
             q = quiz.get_active_question()
-            return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Answer saved"), 200)
+            return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Answer saved"), 200)
         if "group_name" in request.form:
             name = request.form["group_name"]
             groups[access_hash].name = name
             q = quiz.get_active_question()
-            return make_response(render_template("group.html.jinja", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Name saved"), 200)
+            return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Name saved"), 200)
         return make_response("Missing parameter", 400)
 
 api.add_resource(Group, "/group/<string:access_hash>")
@@ -341,7 +341,7 @@ class Quiz(Resource):
         """
         Get the entire quiz
         """
-        return make_response(render_template("quiz.html.jinja", questions=quiz.questions, QuestionStatus=QuestionStatus), 200)
+        return make_response(render_template("quiz.html", questions=quiz.questions, QuestionStatus=QuestionStatus), 200)
 
     @auth.login_required
     def post(self):
@@ -361,7 +361,7 @@ api.add_resource(Quiz, "/quiz")
 @app.route("/index")
 def index():
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("index.html.jinja"), 200, headers)
+    return make_response(render_template("index.html"), 200, headers)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -378,19 +378,19 @@ def register():
                     with open(email_list_path, "a") as f:
                         f.write(email + "\n")
                     return make_response(
-                        render_template("register.html.jinja", saved=True), 200, headers
+                        render_template("register.html", saved=True), 200, headers
                     )
         except Exception as e:
             print(e)
-            return make_response(render_template("register.html.jinja", notsaved=True), 200, headers)
-    return make_response(render_template("register.html.jinja"), 200, headers)
+            return make_response(render_template("register.html", notsaved=True), 200, headers)
+    return make_response(render_template("register.html"), 200, headers)
 
 
 @app.route("/admin")
 @auth.login_required
 def admin():
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("admin.html.jinja"), 200, headers)
+    return make_response(render_template("admin.html"), 200, headers)
 
 
 @app.route("/question")
@@ -401,7 +401,7 @@ def overlay_question():
     else:
         q = quiz.get_last_finished()
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("question.html.jinja", question=q, QuestionStatus=QuestionStatus), 200, headers)
+    return make_response(render_template("question.html", question=q, QuestionStatus=QuestionStatus), 200, headers)
 
 
 @app.route("/scoreboard")
@@ -416,7 +416,7 @@ def scoreboard():
                 p += 1
         points.append((group.name, p))
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("scoreboard.html.jinja", points=list(sorted(points, key=lambda x: x[1], reverse=True))), 200, headers)
+    return make_response(render_template("scoreboard.html", points=list(sorted(points, key=lambda x: x[1], reverse=True))), 200, headers)
 
 
 ### --------------- Main --------------- ### 
