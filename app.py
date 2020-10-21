@@ -1,14 +1,14 @@
 import re
 import os
-import json
 import random
 import smtplib, ssl
 import pathlib
 import uuid
 
+from copy import deepcopy
 from enum import Enum
 from threading import Lock
-from flask import Flask, render_template, request, make_response, redirect, url_for, jsonify
+from flask import Flask, render_template, request, make_response, redirect, url_for, jsonify, json
 from flask_httpauth import HTTPBasicAuth
 from flask_restful import fields, marshal_with
 from flask_restful import Resource, Api
@@ -16,14 +16,14 @@ from typing import Dict
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from werkzeug.security import generate_password_hash, check_password_hash
-import jinja2 
+import jinja2
 
 
 app = Flask(__name__)
 lock = Lock()
 api = Api(app)
 
-### --------------- Read Config --------------- ### 
+### --------------- Read Config --------------- ###
 
 
 if "SUPPORT_EMAIL" in os.environ:
@@ -34,7 +34,7 @@ else:
 if "DATA_FILE_PATH" in os.environ:
     outfile_path = os.environ["DATA_FILE_PATH"]
 else:
-    outfile_path = os.path.join(pathlib.Path().absolute() , "oe-landingpage/")
+    outfile_path = os.path.join(pathlib.Path().absolute(), "oe-landingpage/")
 email_list_path = os.path.join(outfile_path, "email_file.txt")
 quiz_path = os.path.join(outfile_path, "quiz.json")
 group_path = os.path.join(outfile_path, "groups.json")
@@ -77,7 +77,7 @@ if "MAIL_SMTP_SERVER_PORT" in os.environ:
 else:
     MAIL_SMTP_SERVER_PORT = 465
 
-### --------------- Authentication --------------- ### 
+### --------------- Authentication --------------- ###
 
 
 auth = HTTPBasicAuth()
@@ -101,7 +101,7 @@ def return404(e):
     )
 
 
-### --------------- API --------------- ### 
+### --------------- API --------------- ###
 
 
 class GroupDao(object):
@@ -146,20 +146,23 @@ class Groups(Resource):
                 if a.strip() != "":
                     emails.append(a.strip())
 
-        # generate groups 
+        # generate groups
         random.shuffle(emails)
         amount_to_many = len(emails) % size_min
-        left_over = emails [:amount_to_many]
+        left_over = emails[:amount_to_many]
         generated_groups = []
         emails = emails[amount_to_many:]
         for i in range(0, len(emails), size_min):
-            generated_groups.append(emails[i:i + size_min])
+            generated_groups.append(emails[i : i + size_min])
         for i, mail in enumerate(left_over):
             generated_groups[i % len(generated_groups)].append(mail)
 
         comm_links = get_list_of_communication_links()
         if len(comm_links) < len(generated_groups):
-            return make_response(f"Generated {len(groups)}. Not enough communications links, either more of those or larger group size", 400)
+            return make_response(
+                f"Generated {len(groups)}. Not enough communications links, either more of those or larger group size",
+                400,
+            )
 
         groups = {}
         for i, group in enumerate(generated_groups):
@@ -168,7 +171,7 @@ class Groups(Resource):
 
         with open(group_path, "w") as f:
             json.dump([groups[g].__dict__ for g in groups], f)
-        
+
         return f"Generated {len(groups)} Groups, with the size distribution of {[len(groups[x].emails) for x in groups]}"
 
 
@@ -181,8 +184,46 @@ class Group(Resource):
         Get a representaion of the group
         """
         if access_hash in groups:
-            q = quiz.get_active_question()
-            return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None), 200)
+            ret_format = request.args.get("format", "html")
+            if ret_format == "html":
+                error = request.args.get("error", None)
+                success = request.args.get("success", None)
+                q = quiz.get_active_question()
+                return make_response(
+                    render_template(
+                        "group.html",
+                        group=groups[access_hash],
+                        question=q[0] if len(q) > 0 else None,
+                        error=error,
+                        success=success,
+                        get_new_data_url=api.url_for(
+                            Group, access_hash=access_hash, format="json"
+                        ),
+                    ),
+                    200,
+                )
+            elif ret_format == "json":
+                q = quiz.get_active_question()
+                question_to_send = deepcopy(q[0].__dict__ if len(q) > 0 else None)
+                current_answer = None
+                if question_to_send is not None:
+                    del question_to_send["correct"]
+                    del question_to_send["status"]
+                    if q[0].access_hash in groups[access_hash].answers:
+                        current_answer = groups[access_hash].answers[q[0].access_hash]
+                return jsonify(
+                    **json.loads(
+                        json.htmlsafe_dumps(
+                            {
+                                "question": question_to_send,
+                                "group_name": groups[access_hash].name,
+                                "answer": current_answer
+                                if len(q) > 0
+                                else None,
+                            }
+                        )
+                    )
+                )
         return make_response("Invalid access hash", 403)
 
     def post(self, access_hash):
@@ -198,20 +239,28 @@ class Group(Resource):
             question = quiz.get_active_question()
             if len(question) == 0:
                 q = quiz.get_active_question()
-                return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="No question is being played"), 200)
+                return redirect(
+                    api.url_for(
+                        Group, access_hash=access_hash, error="No question is being played"
+                    )
+                )
             question = question[0]
             if answer not in question.answers:
                 q = quiz.get_active_question()
-                return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, error="Invalid answer"), 200)
+                return redirect(
+                    api.url_for(Group, access_hash=access_hash, error="Invalid answer")
+                )
             group.answers[question.access_hash] = answer
             q = quiz.get_active_question()
-            return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Answer saved"), 200)
+            return redirect(api.url_for(Group, access_hash=access_hash, success="Answer saved"))
+            
         if "group_name" in request.form:
             name = request.form["group_name"]
             groups[access_hash].name = name
             q = quiz.get_active_question()
-            return make_response(render_template("group.html", group=groups[access_hash], question=q[0] if len(q) > 0 else None, success="Name saved"), 200)
+            return redirect(api.url_for(Group, access_hash=access_hash, success="Name saved"))
         return make_response("Missing parameter", 400)
+
 
 api.add_resource(Group, "/group/<string:access_hash>")
 
@@ -232,12 +281,12 @@ def send_mails():
         message["From"] = MAIL_FROM
         message["To"] = "undisclosed"
         text = template.render(group=group)
-        textPart = MIMEText(text, 'plain')
+        textPart = MIMEText(text, "plain")
         message.attach(textPart)
 
         with smtplib.SMTP_SSL(MAIL_SMTP_SERVER, MAIL_SMTP_SERVER_PORT, context=context) as server:
             try:
-                server.login(MAIL_FROM, MAIL_PASSWORD)  
+                server.login(MAIL_FROM, MAIL_PASSWORD)
                 server.set_debuglevel(1)
                 server.sendmail(MAIL_FROM, group.emails, message.as_string())
             except:
@@ -274,7 +323,7 @@ class Question(Resource):
             return jsonify(quiz.get_active_question())
         question = quiz.get_by_access_hash(access_hash)
         user = auth.current_user()
-        if user or question.status == QuestionStatus.ACTIVE:
+        if user:
             return question
 
     @auth.login_required
@@ -306,7 +355,11 @@ class QuizDao:
         return None
 
     def get_active_question(self):
-        return [self.questions[x] for x in self.questions if self.questions[x].status == QuestionStatus.ACTIVE]
+        return [
+            self.questions[x]
+            for x in self.questions
+            if self.questions[x].status == QuestionStatus.ACTIVE
+        ]
 
     def get_last_finished(self):
         return self.last_finished
@@ -332,7 +385,6 @@ def load_quiz_from_disk():
 
     else:
         raise Exception(f"Quiz {quiz_path} not found")
-    
 
 
 class Quiz(Resource):
@@ -341,7 +393,10 @@ class Quiz(Resource):
         """
         Get the entire quiz
         """
-        return make_response(render_template("quiz.html", questions=quiz.questions, QuestionStatus=QuestionStatus), 200)
+        return make_response(
+            render_template("quiz.html", questions=quiz.questions, QuestionStatus=QuestionStatus),
+            200,
+        )
 
     @auth.login_required
     def post(self):
@@ -355,7 +410,8 @@ class Quiz(Resource):
 api.add_resource(Quiz, "/quiz")
 
 
-### --------------- Views --------------- ### 
+### --------------- Views --------------- ###
+
 
 @app.route("/")
 @app.route("/index")
@@ -401,7 +457,9 @@ def overlay_question():
     else:
         q = quiz.get_last_finished()
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("question.html", question=q, QuestionStatus=QuestionStatus), 200, headers)
+    return make_response(
+        render_template("question.html", question=q, QuestionStatus=QuestionStatus), 200, headers
+    )
 
 
 @app.route("/scoreboard")
@@ -416,14 +474,19 @@ def scoreboard():
                 p += 1
         points.append((group.name, p))
     headers = {"Content-Type": "text/html"}
-    return make_response(render_template("scoreboard.html", points=list(sorted(points, key=lambda x: x[1], reverse=True))), 200, headers)
+    return make_response(
+        render_template(
+            "scoreboard.html", points=list(sorted(points, key=lambda x: x[1], reverse=True))
+        ),
+        200,
+        headers,
+    )
 
 
-### --------------- Main --------------- ### 
+### --------------- Main --------------- ###
 
 quiz = None
 groups: Dict[str, GroupDao] = {}
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0")
-    

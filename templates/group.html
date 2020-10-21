@@ -2,9 +2,38 @@
 
 {% block head %}
 <script>
-	setTimeout(function () {
-		window.location.reload(1);
-	}, 2000);
+	NO_QUESTION_TEXT = "Aktuell wird keine Frage gespielt"
+	function reqListener () {
+		a = JSON.parse(this.responseText);
+  		console.log(a);
+		
+		const current_answer = document.getElementById("current_answer"); 
+		current_answer.innerText = a.answer
+
+		const group_name_heading= document.getElementById("group_name_heading"); 
+		group_name_heading.innerText = "Gruppe " + a.group_name
+
+		if (a.question){
+			const answer_options = document.getElementById("answer"); 
+			answer_options.innerHTML = "";
+			for(let i = 0; i < a.question.answers.length; i++){
+				const newOption = document.createElement("option"); 	
+				newOption.innerText = a.question.answers[i];
+				answer_options.appendChild(newOption);
+			}
+		}
+		document.getElementById("nojs").style.display = "none";
+	}
+
+	function requestData(){
+		var oReq = new XMLHttpRequest();
+		oReq.addEventListener("load", reqListener);
+		oReq.open("GET", "{{ get_new_data_url }}");
+		oReq.send();
+	}
+
+	setInterval(requestData, 5000);
+	requestData();
 </script>
 {% endblock %}
 
@@ -19,28 +48,23 @@
 	{{error}}
 </div>
 {% endif %}
+
+<div class="alert alert-danger" role="alert" id="nojs">
+	Kein Javascript. Ok, aber dann musst du selber die Seite neuladen ;)
+</div>
 <div style="min-height: 20px;"></div>
 <div class="content">
-	<h1>Gruppe {{group.name}}</h1>
-	{% if(question) %}
-	<h2>{{question.question}}</h2>
-	{% if(group.answers[question.access_hash])%}
-	<p>Eure aktuelle Antwort lautet: {{group.answers[question.access_hash]}}</p>
-	{% endif %}
+	<h1 id="group_name_heading" >Gruppe {{group.name}}</h1>
+	<h2 id="question_text"></h2>
+	<p>Eure aktuelle Antwort lautet: <span id="current_answer"></span></p>
 	<form action="/group/{{group.access_hash}}" method="POST">
 		<div class="form-group">
 			<label for="answer">Antwort</label>
 			<select class="form-control" id="answer" , name="answer">
-				{% for a in question.answers %}
-				<option>{{a}}</option>
-				{% endfor %}
 			</select>
 		</div>
 		<button type="submit" class="btn btn-primary">Submit</button>
 	</form>
-	{% else %}
-	<h2>Aktuell wird keine Frage gespielt</h2>
-	{% endif %}
 
 	<form action="/group/{{group.access_hash}}" method="POST">
 		<div class="form-group">
