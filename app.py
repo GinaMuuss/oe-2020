@@ -34,7 +34,7 @@ else:
 if "DATA_FILE_PATH" in os.environ:
     outfile_path = os.environ["DATA_FILE_PATH"]
 else:
-    outfile_path = "oe-landingpage/"
+    outfile_path = os.path.join(pathlib.Path().absolute() , "oe-landingpage/")
 email_list_path = os.path.join(outfile_path, "email_file.txt")
 quiz_path = os.path.join(outfile_path, "quiz.json")
 group_path = os.path.join(outfile_path, "groups.json")
@@ -143,7 +143,8 @@ class Groups(Resource):
         emails = []
         with open(email_list_path, "r") as f:
             while a := f.readline():
-                emails.append(a.strip())
+                if a.strip() != "":
+                    emails.append(a.strip())
 
         # generate groups 
         random.shuffle(emails)
@@ -218,7 +219,7 @@ api.add_resource(Group, "/group/<string:access_hash>")
 @app.route("/api/mail", methods=["POST"])
 @auth.login_required
 def send_mails():
-    templateLoader = jinja2.FileSystemLoader(pathlib.Path().absolute())
+    templateLoader = jinja2.FileSystemLoader("/")
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template(template_path)
 
@@ -235,9 +236,12 @@ def send_mails():
         message.attach(textPart)
 
         with smtplib.SMTP_SSL(MAIL_SMTP_SERVER, MAIL_SMTP_SERVER_PORT, context=context) as server:
-            server.login(MAIL_FROM, MAIL_PASSWORD)  
-            server.set_debuglevel(1)
-            server.sendmail(MAIL_FROM, group.emails, message.as_string())
+            try:
+                server.login(MAIL_FROM, MAIL_PASSWORD)  
+                server.set_debuglevel(1)
+                server.sendmail(MAIL_FROM, group.emails, message.as_string())
+            except:
+                continue
 
     return "OK"
 

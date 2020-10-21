@@ -8,5 +8,7 @@ RUN pip3 install -r requirements.txt
 
 COPY ./templates /app/templates
 COPY ./app.py /app/app.py
-ENTRYPOINT ["python3"]
-CMD ["app.py"]
+
+RUN useradd -U gunicorn
+
+CMD gunicorn -b 0.0.0.0:5000 -u gunicorn -g gunicorn app:app -t 2 -w 8
