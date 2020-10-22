@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<script>
+	setInterval(function(){ window.location.reload(true);}, 5000);
+</script>
+{% endblock %}
+
+{% block content %}
+
+<noscript>
+<div class="alert alert-danger" role="alert" id="nojs">
+	Kein Javascript. Ok, aber dann musst du selber die Seite neuladen ;)
+</div>
+</noscript>
+<div style="min-height: 20px;"></div>
+<div class="content">
+	<h1  >Bitte warten</h1>
+	<p> Die Gruppen wurden noch nicht zugeteilt. Diese Seite aktualisiert sich automatisch, und leitet Dich nach der Zuteilung weiter.</p>
+</div>
+{% endblock %}

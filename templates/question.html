@@ -226,10 +226,10 @@
       </header>
 
       <ol>
-        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[0] == question.correct %}correct_answer{% endif %}">{{question.answers[0]}}</li>
-        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[1] == question.correct %}correct_answer{% endif %}">{{question.answers[1]}}</li>
-        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[2] == question.correct %}correct_answer{% endif %}">{{question.answers[2]}}</li>
-        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[3] == question.correct %}correct_answer{% endif %}">{{question.answers[3]}}</li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[0] == question.correct %}correct_answer{% endif %}">{{question.answers[0]}}</li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[1] == question.correct %}correct_answer{% endif %}">{{question.answers[1]}}</li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[2] == question.correct %}correct_answer{% endif %}">{{question.answers[2]}}</li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[3] == question.correct %}correct_answer{% endif %}">{{question.answers[3]}}</li>
       </ol>
     {% endif %}
     </div>
