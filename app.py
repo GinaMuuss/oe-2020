@@ -436,6 +436,7 @@ def register():
                     return make_response(
                         render_template("register.html", saved=True), 200, headers
                     )
+            return make_response(render_template("register.html", notsaved=True), 200, headers)
         except Exception as e:
             print(e)
             return make_response(render_template("register.html", notsaved=True), 200, headers)
