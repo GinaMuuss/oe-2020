@@ -1,25 +1,46 @@
-oe-landingpage: # Online Anweisungen für Dozenten für VLU. vlu-lecturer.fachschaft.info
+version: "3.7"
+
+volumes:
+  mariadb-data:
+
+services:
+  # mariadb: 
+  #   image: mariadb:latest
+  #   container_name: mariadb
+  #   restart: always
+  #   volumes:
+  #     - mariadb-data:/var/lib/mysql
+  #   environment:
+  #     - MYSQL_RANDOM_ROOT_PASSWORD=yes
+  #     - MYSQL_DATABASE=${SQL_DB}
+  #     - MYSQL_USER=${SQL_USER}
+  #     - MYSQL_PASSWORD=${SQL_PW}
+
+  oe-landingpage:
     build: .
-    #image: oe-landingpage
-    ports:
-      - 5000:5000
+    # image: oe-landingpage
+    # ports:
+    #   - "127.0.0.1:5000:5000" # for testing
     container_name: oe-landingpage
     restart: always
     volumes:
       - ${PWD}/oe-landingpage:/app/db
-    #labels:
-    #  - "traefik.enable=true"
-    #  - "traefik.port=5000"
-    #  - "traefik.frontend.rule=Host:oe.fachschaft.info"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.services.oepage.loadbalancer.server.port=5000"
+    #   - "traefik.http.routers.oepage.rule=Host(`${URL}`)"
+    #   - "traefik.http.routers.oepage.tls=true"
+    #   - "traefik.http.routers.oepage.tls.certResolver=default"
+    #   - "traefik.http.routers.oepage.tls.options=default"
+    #   - "traefik.http.routers.oepage.middlewares=stsheaders"
     environment:
       REGISTER_TOKEN: "${REGISTER_TOKEN}"
       DATA_FILE_PATH: /app/db/
-      SUPPORT_EMAIL: Email@example.com
+      SUPPORT_EMAIL: "${MAIL_ADDRESS_SUPPORT}"
       MAIL_FROM: "${MAIL_FROM}"
       MAIL_PASSWORD: "${MAIL_PASSWORD}"
       MAIL_SMTP_SERVER: "${MAIL_SMTP_SERVER}"
       MAIL_SMTP_SERVER_PORT: "${MAIL_SMTP_SERVER_PORT}"
       MAIL_SUBJECT: "${MAIL_SUBJECT}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
-      DB_CONNECTION: "${DB_CONNECTION}"
-      
+      DB_CONNECTION: "mysql+mysqldb://${SQL_USER}:${SQL_PW}@${SQL_HOST}/${SQL_DB}"
