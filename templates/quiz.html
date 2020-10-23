@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+	<div class="card-container">
+	{% for question in questions %}
+		<div class="card card-clickable">
+			<div class="card-body">
+				<h5 class="card-title">{{questions[question].question}}</h5>
+				<p class="card-text">
+					<form action="/api/question/{{questions[question].access_hash}}" method="POST">
+						<div class="form-group">
+							<select class="form-control" id="status", name="status">
+								<option {% if(questions[question].status == QuestionStatus.NEW)%}selected{% endif %} value="NEW">New</option>
+								<option {% if(questions[question].status == QuestionStatus.ACTIVE)%}selected{% endif %} value="ACTIVE">Active</option>
+								<option {% if(questions[question].status == QuestionStatus.FINISHED)%}selected{% endif %} value="FINISHED">Finished</option>
+							</select>
+						</div>
+						<button type="submit" class="btn btn-primary">Submit</button>
+					</form>
+				</p>
+			</div>
+		</div>
+	{% endfor %}	
+	</div>
+		
+{% endblock %}

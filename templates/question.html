@@ -1,0 +1,239 @@
+<!DOCTYPE xhtml>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Question</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      --main-color-hue: 227;
+      --main-text-color: white;
+      --correct-hue: 120;
+    }
+
+    .slant {
+      position: absolute;
+      width: 200%;
+      left: -50%;
+    }
+
+    #bg_slant1 {
+      left: -80%;
+      bottom: -240px;
+      height: 200px;
+      width: 250%;
+      background: hsl(var(--main-color-hue), 55.2%, 28%);
+      transform: rotate(15deg);
+    }
+
+    #bg_slant2 {
+      height: 90px;
+      background: hsl(var(--main-color-hue), 60.3%, 27.6%);
+      transform: rotate(1deg);
+      top: -50px;
+    }
+
+    #bg_slant3 {
+      height: 230px;
+      background: hsl(var(--main-color-hue), 61.9%, 12.4%);
+      transform: rotate(-8deg);
+      bottom: -200px;
+    }
+
+    #bg_slant4 {
+      height: 230px;
+      background: hsl(var(--main-color-hue), 61.9%, 12.4%);
+      transform: rotate(-4deg);
+      top: -120px;
+      z-index:0;
+    }
+
+    .border {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 8px solid white;
+      overflow: hidden;
+    }
+
+    .text {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    #container {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      background: hsl(var(--main-color-hue), 60%, 21.6%);
+      width: calc(100vw - 36px);
+      height: 200px;
+      overflow: hidden;
+    }
+
+    #container.wwm {
+      height: auto;
+      background: hsl(var(--main-color-hue), 61.9%, 12.4%);
+    }
+    .wwm header{
+      text-align:center;
+      margin:0;
+      padding:20px 0;
+      width:100%;
+      display:block;
+      -background: hsl(var(--main-color-hue), 61.9%, 12.4%);
+      color: var(--main-text-color);
+      position:relative;
+    }
+    .wwm ol{
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+      align-items: center;
+      height: 110%;
+      list-style-type: none;
+      padding:10px 0;
+      min-height:160px;
+    }
+    .wwm ol li{
+      text-align: left;
+      font-family: "Open Sans", Helvetica, Arial;
+      font-size: 36px;
+      line-height: 32px;
+      font-weight: bold;
+      text-transform: uppercase;
+      width: 45%;
+      height:52px;
+      color: var(--main-text-color);
+      padding:10px 20px;
+      margin:10px 0;
+      background: hsl(var(--main-color-hue), 55.2%, 28%);
+      position:relative;
+      box-shadow: 0px 0px 6px #fff;
+    }
+    .wwm ol li::after, .wwm ol li::before{
+      display: block;
+      width: 36px;
+      height: 36px;
+      position: absolute;
+      top:8px;
+      content: "\00a0";
+      transform: rotate( 45deg );
+      background: hsl(var(--main-color-hue), 55.2%, 28%);
+    }
+    .wwm ol li::before{
+      left: -18px;
+      box-shadow: -2px 2px 2px 0 rgba( 255, 255, 255, .4 );
+    }
+    .wwm ol li::after{
+      right: -18px;
+      box-shadow: 2px -2px 2px 0 rgba( 255, 255, 255, .4 );
+    }
+    .wwm ol li.selected_answer{
+      box-shadow: 0px 0px 6px 2px RGBA(255, 127, 0, 1);
+    }
+    .wwm ol li.selected_answer::before{
+      box-shadow: -3px 3px 2px 2px RGBA(255, 127, 0, .4);
+    }
+    .wwm ol li.selected_answer::after{
+      box-shadow: 3px -3px 2px 2px RGBA(255, 127, 0, .4);
+    }
+    .wwm ol li.correct_answer{
+      background: hsl(var(--correct-hue), 55.2%, 28%);
+    }
+    .wwm ol li.correct_answer::after, .wwm ol li.correct_answer::before{
+      background: hsl(var(--correct-hue), 55.2%, 28%);
+    }
+
+    h1 {
+      padding: 0px 30px;
+      text-align: center;
+      font-family: "Open Sans", Helvetica, Arial;
+      font-size: 62px;
+      line-height: 60px;
+      font-weight: bold;
+      text-transform: uppercase;
+      width: 100%;
+      color: var(--main-text-color);
+    }
+    h2 {
+      padding: 0px 30px;
+      text-align: center;
+      font-family: "Open Sans", Helvetica, Arial;
+      font-size: 36px;
+      line-height: 36px;
+      font-weight: bold;
+      text-transform: uppercase;
+      width: 100%;
+      color: var(--main-text-color);
+    }
+
+    #team_list{
+      position:absolute;
+      top:20px;
+      right:20px;
+      list-style:none;
+      width:25%;
+    }
+    #team_list li{
+      font-family: "Open Sans", Helvetica, Arial;
+      font-size: 36px;
+      line-height: 36px;
+      padding:10px 20px;
+      background: hsl(var(--main-color-hue), 55.2%, 28%);
+      color: var(--main-text-color);
+    }
+    #team_list li:after{
+      content:attr(data-points) " Pkt.";
+      border-radius:10px;
+      background:var(--main-text-color);
+      color:hsl(var(--main-color-hue), 55.2%, 28%);
+      float:right;
+      font-size:32px;
+      padding:0 10px;
+    }
+    #team_list.hide_points li:after{ display:none; }
+  </style>
+
+  <script>
+
+  </script>
+</head>
+
+<body>
+
+  <div class="border">
+    <div id="container" class="wwm">
+    {% if question %}
+      <header>
+        <h2>{{question.question}}</h2>
+      </header>
+
+      <ol>
+        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[0] == question.correct %}correct_answer{% endif %}">{{question.answers[0]}}</li>
+        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[1] == question.correct %}correct_answer{% endif %}">{{question.answers[1]}}</li>
+        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[2] == question.correct %}correct_answer{% endif %}">{{question.answers[2]}}</li>
+        <li class="{% if question.status == QuestionStatus.FINISHED and question.answers[3] == question.correct %}correct_answer{% endif %}">{{question.answers[3]}}</li>
+      </ol>
+    {% endif %}
+    </div>
+  </div>
+
+
+</body></html>
