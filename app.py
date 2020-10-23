@@ -111,6 +111,7 @@ def return404(e):
 
 ### --------------- API --------------- ###
 
+
 def get_list_of_communication_links():
     links = []
     with open(communication_link_path, "r") as f:
@@ -125,7 +126,7 @@ class Groups(Resource):
         """
         Get all the groups
         """
-        return jsonify(DB_HELPER.session().query(db.Group)) # TODO test
+        return jsonify(DB_HELPER.session().query(db.Group))  # TODO test
 
     @auth.login_required
     def post(self):
@@ -138,7 +139,6 @@ class Groups(Resource):
 
         # get all the email adresses
         users = DB_HELPER.session().query(db.User)
-
 
         # generate groups
         amount_to_many = users.count() % size_min
@@ -159,32 +159,51 @@ class Groups(Resource):
 
         groups = []
         for i, group in enumerate(generated_groups):
-            g = db.Group(access_hash= str(uuid.uuid4()), users=group, name=f"Group {i}", com_link=comm_links[i])
+            g = db.Group(
+                access_hash=str(uuid.uuid4()),
+                users=group,
+                name=f"Group {i}",
+                com_link=comm_links[i],
+            )
             groups.append(g)
 
         try:
             DB_HELPER.session().query(db.Group).delete()
             DB_HELPER.session().add_all(groups)
-            DB_HELPER.session().query(db.Quiz).first().game_state = db.GameState.GROUPS_HAVE_BEEN_ASSIGNED
+            DB_HELPER.session().query(
+                db.Quiz
+            ).first().game_state = db.GameState.GROUPS_HAVE_BEEN_ASSIGNED
             DB_HELPER.session().commit()
         except:
             DB_HELPER.session().rollback()
             raise
 
         return f"Generated {len(groups)} Groups, with the size distribution of {[len(x.users) for x in groups]}"
-    
+
 
 api.add_resource(Groups, "/api/group")
 
+
 def get_active_question():
-    return DB_HELPER.session().query(db.Question).filter(db.Question.status == QuestionState.ACTIVE).first()
+    return (
+        DB_HELPER.session()
+        .query(db.Question)
+        .filter(db.Question.status == QuestionState.ACTIVE)
+        .first()
+    )
+
 
 class Group(Resource):
     def get(self, access_hash):
         """
         Get a representaion of the group
         """
-        if (group := DB_HELPER.session().query(db.Group).filter(db.Group.access_hash == access_hash).first()):
+        if (
+            group := DB_HELPER.session()
+            .query(db.Group)
+            .filter(db.Group.access_hash == access_hash)
+            .first()
+        ) :
             ret_format = request.args.get("format", "html")
             if ret_format == "html":
                 error = request.args.get("error", None)
@@ -207,21 +226,21 @@ class Group(Resource):
                 q = get_active_question()
                 if q:
                     question_to_send = {"question": q.text, "answers": [a.text for a in q.answers]}
-                else: 
+                else:
                     question_to_send = None
                 current_answer = None
                 if question_to_send is not None:
                     if q.access_hash in [x.question_id for x in group.answers]:
-                        current_answer = [x.text for x in group.answers if x.question_id == q.access_hash][0]
+                        current_answer = [
+                            x.text for x in group.answers if x.question_id == q.access_hash
+                        ][0]
                 return jsonify(
                     **json.loads(
                         json.htmlsafe_dumps(
                             {
                                 "question": question_to_send,
                                 "group_name": group.name,
-                                "answer": current_answer
-                                if q
-                                else None,
+                                "answer": current_answer if q else None,
                             }
                         )
                     )
@@ -232,7 +251,12 @@ class Group(Resource):
         """
         Set the answer for the current question
         """
-        if not (group := DB_HELPER.session().query(db.Group).filter(db.Group.access_hash == access_hash).first()):
+        if not (
+            group := DB_HELPER.session()
+            .query(db.Group)
+            .filter(db.Group.access_hash == access_hash)
+            .first()
+        ):
             return make_response("Invalid access hash", 403)
         if "answer" in request.form:
             answer_text = request.form["answer"]
@@ -243,7 +267,14 @@ class Group(Resource):
                         Group, access_hash=access_hash, error="No question is being played"
                     )
                 )
-            if not (answer := DB_HELPER.session().query(db.AnswerOptions).filter(db.AnswerOptions.question == question , db.AnswerOptions.text == answer_text).first()):
+            if not (
+                answer := DB_HELPER.session()
+                .query(db.AnswerOptions)
+                .filter(
+                    db.AnswerOptions.question == question, db.AnswerOptions.text == answer_text
+                )
+                .first()
+            ):
                 return redirect(
                     api.url_for(Group, access_hash=access_hash, error="Invalid answer")
                 )
@@ -253,7 +284,7 @@ class Group(Resource):
             group.answers.append(answer)
             DB_HELPER.session().commit()
             return redirect(api.url_for(Group, access_hash=access_hash, success="Answer saved"))
-            
+
         if "group_name" in request.form:
             name = request.form["group_name"]
             group.name = name
@@ -263,7 +294,6 @@ class Group(Resource):
 
 
 api.add_resource(Group, "/group/<string:access_hash>")
-
 
 
 class Question(Resource):
@@ -279,20 +309,30 @@ class Question(Resource):
             return jsonify(get_active_question())
         user = auth.current_user()
         if user:
-            question = DB_HELPER.session().query(db.Question).filter(db.Question.access_hash == access_hash).first()
+            question = (
+                DB_HELPER.session()
+                .query(db.Question)
+                .filter(db.Question.access_hash == access_hash)
+                .first()
+            )
             return question
 
     def update_question_status(self, access_hash: str, status: QuestionState) -> bool:
         if status == QuestionState.ACTIVE and get_active_question() != None:
             return False
 
-        question = DB_HELPER.session().query(db.Question).filter(db.Question.access_hash == access_hash).first()
+        question = (
+            DB_HELPER.session()
+            .query(db.Question)
+            .filter(db.Question.access_hash == access_hash)
+            .first()
+        )
         if not question:
             return False
         question.status = status
         if status == QuestionState.FINISHED:
             DB_HELPER.session().query(db.Quiz).first().last_finished_question = question
-        
+
         # TODO calc points
         DB_HELPER.session().commit()
         return True
@@ -313,7 +353,6 @@ class Question(Resource):
 api.add_resource(Question, "/api/question/<string:access_hash>")
 
 
-
 class Quiz(Resource):
     @auth.login_required
     def get(self):
@@ -327,7 +366,7 @@ class Quiz(Resource):
         )
 
     def post(self):
-        """ 
+        """
         Resets the quiz
         """
         DB_HELPER.session().query(db.Group).delete()
@@ -343,17 +382,24 @@ class User(Resource):
         """
         Get the users page
         """
-        user = DB_HELPER.session().query(db.User).filter(db.User.access_hash == access_hash).first()
+        user = (
+            DB_HELPER.session().query(db.User).filter(db.User.access_hash == access_hash).first()
+        )
         if not user:
             return redirect(url_for("play"))
-        game_state=DB_HELPER.session().query(db.Quiz).first().game_state
+        game_state = DB_HELPER.session().query(db.Quiz).first().game_state
         if game_state == db.GameState.NEW:
             return make_response(
                 render_template("user.html"),
                 200,
             )
         elif game_state == db.GameState.GROUPS_HAVE_BEEN_ASSIGNED:
-            user = DB_HELPER.session().query(db.User).filter(db.User.access_hash == access_hash).first()
+            user = (
+                DB_HELPER.session()
+                .query(db.User)
+                .filter(db.User.access_hash == access_hash)
+                .first()
+            )
             return redirect(api.url_for(Group, access_hash=user.group.access_hash))
         raise ValueError("Unhandled Gamestate " + game_state)
 
@@ -366,16 +412,19 @@ class User(Resource):
         DB_HELPER.session().commit()
         return redirect(api.url_for(User, access_hash=user.access_hash))
 
+
 api.add_resource(User, "/user/<string:access_hash>")
+
 
 @app.route("/play")
 def play():
-    game_state=DB_HELPER.session().query(db.Quiz).first().game_state
+    game_state = DB_HELPER.session().query(db.Quiz).first().game_state
     headers = {"Content-Type": "text/html"}
     if game_state == db.GameState.NEW:
         return make_response(render_template("play.html"), 200, headers)
     else:
         return make_response("Sorry das Spiel hat schon angefangen :/", 403, headers)
+
 
 ### --------------- Views --------------- ###
 

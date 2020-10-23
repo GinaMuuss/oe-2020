@@ -59,7 +59,9 @@ class AnswerOptions(Base):
     points = Column(Float)
     question_id = Column(String(100), ForeignKey("questions.access_hash"))
     question = relationship("Question", back_populates="answers")
-    groups = relationship("Group", secondary=association_table, back_populates="answers", cascade="all, delete")
+    groups = relationship(
+        "Group", secondary=association_table, back_populates="answers", cascade="all, delete"
+    )
 
 
 class GameState(enum.Enum):
@@ -73,6 +75,7 @@ class Quiz(Base):
     last_finished_question_id = Column(String(100), ForeignKey("questions.access_hash"))
     last_finished_question = relationship("Question")
     game_state = Column(Enum(GameState))
+
 
 class DBHelper:
     def __init__(self, connection_str):
@@ -88,12 +91,11 @@ class DBHelper:
         engine = create_engine(self.connection_str)
 
         Base.metadata.create_all(engine)
-        
+
         self._session = Session(engine)
 
         if not self._session.query(Quiz).first():
             quiz = Quiz(game_state=GameState.NEW)
             self._session.add(quiz)
 
-        return self._session 
-
+        return self._session
