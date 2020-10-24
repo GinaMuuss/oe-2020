@@ -4,25 +4,27 @@ volumes:
   mariadb-data:
 
 services:
-  # mariadb: 
-  #   image: mariadb:latest
-  #   container_name: mariadb
-  #   restart: always
-  #   volumes:
-  #     - mariadb-data:/var/lib/mysql
-  #   environment:
-  #     - MYSQL_RANDOM_ROOT_PASSWORD=yes
-  #     - MYSQL_DATABASE=${SQL_DB}
-  #     - MYSQL_USER=${SQL_USER}
-  #     - MYSQL_PASSWORD=${SQL_PW}
+  mariadb: 
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=${SQL_DB}
+      - MYSQL_USER=${SQL_USER}
+      - MYSQL_PASSWORD=${SQL_PW}
 
   oe-landingpage:
-    build: .
-    # image: oe-landingpage
-    # ports:
-    #   - "127.0.0.1:5000:5000" # for testing
+    #build: .
+    image: oe-landingpage
+    #ports:
+    # - "127.0.0.1:5000:5000" # for testing
     container_name: oe-landingpage
     restart: always
+    depends_on:
+      - mariadb
     volumes:
       - ${PWD}/oe-landingpage:/app/db
     # labels:
@@ -35,8 +37,9 @@ services:
     #   - "traefik.http.routers.oepage.middlewares=stsheaders"
     environment:
       REGISTER_TOKEN: "${REGISTER_TOKEN}"
+      URL: "${URL}"
       DATA_FILE_PATH: /app/db/
-      SUPPORT_EMAIL: "${MAIL_ADDRESS_SUPPORT}"
+      MAIL_ADDRESS_SUPPORT: "${MAIL_ADDRESS_SUPPORT}"
       MAIL_FROM: "${MAIL_FROM}"
       MAIL_PASSWORD: "${MAIL_PASSWORD}"
       MAIL_SMTP_SERVER: "${MAIL_SMTP_SERVER}"

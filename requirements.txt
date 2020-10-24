@@ -5,3 +5,4 @@ gunicorn
 pymysql
 sqlalchemy
 sqlalchemy-utils
+mysqlclient
