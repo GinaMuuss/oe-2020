@@ -27,8 +27,8 @@ api = Api(app)
 ### --------------- Read Config --------------- ###
 
 
-if "SUPPORT_EMAIL" in os.environ:
-    support_mail_address = os.environ["SUPPORT_EMAIL"]
+if "MAIL_ADDRESS_SUPPORT" in os.environ:
+    support_mail_address = os.environ["MAIL_ADDRESS_SUPPORT"]
 else:
     support_mail_address = ""
 
