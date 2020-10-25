@@ -434,7 +434,7 @@ class User(Resource):
                 )
                 if user:
                     return redirect(api.url_for(Group, access_hash=user.group.access_hash))
-                return make_response("Sorry, das Spiel hat schon angefangen", 400)
+                return make_response("user not found, please create a new one at /play", 400)
         raise ValueError("Unhandled Gamestate " + game_state)
 
     def post(self, access_hash):
@@ -443,10 +443,12 @@ class User(Resource):
         """
         with DBHelper(DB_CONNECTION) as session:
             game_state = session.query(db.Quiz).first().game_state
-            if game_state == db.GameState.GROUPS_HAVE_BEEN_ASSIGNED:
-                return make_response("Sorry, das Spiel hat schon angefangen", 400)
             user = db.User(access_hash=str(uuid.uuid4()))
             session.add(user)
+            if game_state == db.GameState.GROUPS_HAVE_BEEN_ASSIGNED:
+                # add user to existing group
+                group = random.choice([x for x in session.query(db.Group)])
+                group.users.append(user)
             session.commit()
             return redirect(api.url_for(User, access_hash=user.access_hash))
 
@@ -459,10 +461,7 @@ def play():
     with DBHelper(DB_CONNECTION) as session:
         game_state = session.query(db.Quiz).first().game_state
     headers = {"Content-Type": "text/html"}
-    if game_state == db.GameState.NEW:
-        return make_response(render_template("play.html"), 200, headers)
-    else:
-        return make_response("Sorry das Spiel hat schon angefangen :/", 403, headers)
+    return make_response(render_template("play.html"), 200, headers)
 
 
 ### --------------- Views --------------- ###
@@ -473,6 +472,17 @@ def play():
 def index():
     headers = {"Content-Type": "text/html"}
     return make_response(render_template("index.html"), 200, headers)
+
+
+@app.route("/resetEverything", methods=["POST"])
+@auth.login_required
+def resetEverything():
+    with DBHelper(DB_CONNECTION) as session:
+        session.query(db.Group).delete()
+        session.query(db.User).delete()
+        session.query(db.Question).delete()
+        session.commit()
+    return make_response("OK", 200)
 
 
 @app.route("/register", methods=["GET", "POST"])
