@@ -50,6 +50,9 @@ class Question(Base):
     text = Column(String(2000))
     answers = relationship("AnswerOptions")
 
+    def get_amount_answers(self):
+        return sum([len(x.groups) for x in self.answers])
+
 
 class AnswerOptions(Base):
     __tablename__ = "answer_options"

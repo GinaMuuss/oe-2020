@@ -14,6 +14,11 @@
 								<option {% if(question.status == QuestionState.ACTIVE)%}selected{% endif %} value="ACTIVE">Active</option>
 								<option {% if(question.status == QuestionState.FINISHED)%}selected{% endif %} value="FINISHED">Finished</option>
 							</select>
+							{% if(question.status == QuestionState.ACTIVE)%}
+							<p>
+								Anzahl Antworten bis jetzt: {{ question.get_amount_answers() }} 
+							</p>
+							{% endif %}
 						</div>
 						<button type="submit" class="btn btn-primary">Submit</button>
 					</form>
