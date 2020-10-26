@@ -15,4 +15,5 @@ RUN useradd -U gunicorn
 # ENTRYPOINT ["python3"]
 # CMD ["app.py"]
 
-CMD gunicorn -b 0.0.0.0:5000 -u gunicorn -g gunicorn app:app -t 2 -w 8 --log-file=- --access-logfile=-
+CMD gunicorn -b 0.0.0.0:5000 -u gunicorn -g gunicorn app:app -t 2 -w 8 --log-file=- 
+#--access-logfile=-
