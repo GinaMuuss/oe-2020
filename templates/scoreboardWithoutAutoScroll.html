@@ -198,7 +198,6 @@
       padding:10px 20px;
       background: hsl(var(--main-color-hue), 55.2%, 28%);
       color: var(--main-text-color);
-      -border-bottom: 1px solid hsl(var(--main-color-hue), 55.2%, 40%);
     }
     #team_list li:nth-child(even){
       background: hsl(var(--main-color-hue), 55.2%, 18%);
@@ -213,51 +212,17 @@
       padding:0 10px;
     }
     #team_list.hide_points li:before{ display:none; }
-    /* scroll team list if too large */
-    body{
-      --translate-value:0px;
-    }
-    #team_list.auto_scroll{
-      animation: auto_translate 45s linear infinite alternate;
-    }
-    @-moz-keyframes auto_translate {
-        0% { margin-top:0; }
-       10% { margin-top:0; }
-       90% { margin-top:var(--translate-value); }
-      100% { margin-top:var(--translate-value); }
-    }
-    @-webkit-keyframes bouncing-text {
-        0% { margin-top:0; }
-       20% { margin-top:0; }
-       80% { margin-top:var(--translate-value); }
-      100% { margin-top:var(--translate-value); }
-    }
-    @keyframes auto_translate {
-        0% { margin-top:0; }
-       20% { margin-top:0; }
-       80% { margin-top:var(--translate-value); }
-      100% { margin-top:var(--translate-value); }
-    }
   </style>
 
   <script>
-    function updateAutoscrollValue(){
-      var difference = (document.body.clientHeight / 2) - document.getElementById('team_list').clientHeight;
-      if( difference < 10 ){
-        document.body.style.setProperty('--translate-value', difference + "px");
-        console.log("[Debug]", "Update auto scroll value to " + difference + "px.")
-      }else{
-        console.log("[Debug]", "Autoscroll will take no effect.")
-      }
-    }
-    setTimeout( updateAutoscrollValue, 1000*3 );
+
   </script>
 </head>
 
 <body>
 
   <div class="border">
-    <ul id="team_list" class="auto_scroll">
+    <ul id="team_list">
         {% for group in points %}
             <li data-points="{{group[1]}}">{{group[0]}} </li>
         {% endfor %}

@@ -109,7 +109,7 @@
       height: 110%;
       list-style-type: none;
       padding:10px 0;
-      min-height:160px;
+      min-height:220px;
     }
     .wwm ol li{
       text-align: left;
@@ -118,31 +118,40 @@
       line-height: 32px;
       font-weight: bold;
       text-transform: uppercase;
-      width: 45%;
-      height:52px;
+      width: 44%;
+      height:84px;
       color: var(--main-text-color);
-      padding:10px 20px;
-      margin:10px 0;
+      padding:10px 50px;
+      margin:10px 50px;
       background: hsl(var(--main-color-hue), 55.2%, 28%);
       position:relative;
       box-shadow: 0px 0px 6px #fff;
     }
+    .wwm ol li span{
+      position:absolute;
+      top:10px;
+      bottom:10px;
+      left:0;
+      right:0;
+      z-index:5;
+      overflow:hidden;
+    }
     .wwm ol li::after, .wwm ol li::before{
       display: block;
-      width: 36px;
-      height: 36px;
+      width: 60px;
+      height: 60px;
       position: absolute;
-      top:8px;
+      top:12px;
       content: "\00a0";
       transform: rotate( 45deg );
       background: hsl(var(--main-color-hue), 55.2%, 28%);
     }
     .wwm ol li::before{
-      left: -18px;
+      left: -30px;
       box-shadow: -2px 2px 2px 0 rgba( 255, 255, 255, .4 );
     }
     .wwm ol li::after{
-      right: -18px;
+      right: -30px;
       box-shadow: 2px -2px 2px 0 rgba( 255, 255, 255, .4 );
     }
     .wwm ol li.selected_answer{
@@ -189,7 +198,7 @@
       top:20px;
       right:20px;
       list-style:none;
-      width:25%;
+      width:45%;
     }
     #team_list li{
       font-family: "Open Sans", Helvetica, Arial;
@@ -199,7 +208,10 @@
       background: hsl(var(--main-color-hue), 55.2%, 28%);
       color: var(--main-text-color);
     }
-    #team_list li:after{
+    #team_list li:nth-child(even){
+      background: hsl(var(--main-color-hue), 55.2%, 18%);
+    }
+    #team_list li:before{
       content:attr(data-points) " Pkt.";
       border-radius:10px;
       background:var(--main-text-color);
@@ -208,7 +220,7 @@
       font-size:32px;
       padding:0 10px;
     }
-    #team_list.hide_points li:after{ display:none; }
+    #team_list.hide_points li:before{ display:none; }
   </style>
 
   <script>
@@ -226,10 +238,10 @@
       </header>
 
       <ol>
-        <li class="{% if question.status == QuestionState.FINISHED and question.answers[0].correct %}correct_answer{% endif %}">{{question.answers[0].text}}</li>
-        <li class="{% if question.status == QuestionState.FINISHED and question.answers[1].correct %}correct_answer{% endif %}">{{question.answers[1].text}}</li>
-        <li class="{% if question.status == QuestionState.FINISHED and question.answers[2].correct %}correct_answer{% endif %}">{{question.answers[2].text}}</li>
-        <li class="{% if question.status == QuestionState.FINISHED and question.answers[3].correct %}correct_answer{% endif %}">{{question.answers[3].text}}</li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[0].correct %}correct_answer{% endif %}"><span>{{question.answers[0].text}}</span></li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[1].correct %}correct_answer{% endif %}"><span>{{question.answers[1].text}}</span></li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[2].correct %}correct_answer{% endif %}"><span>{{question.answers[2].text}}</span></li>
+        <li class="{% if question.status == QuestionState.FINISHED and question.answers[3].correct %}correct_answer{% endif %}"><span>{{question.answers[3].text}}</span></li>
       </ol>
     {% endif %}
     </div>
