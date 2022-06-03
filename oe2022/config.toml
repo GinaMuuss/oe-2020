@@ -1,0 +1,17 @@
+baseURL = 'https://oe.fachschaft.info/'
+languageCode = 'en-us'
+
+theme= "monochrome"
+
+[languages]
+  [languages.de]
+    title = 'Orientierungseinheit 2022'
+    contentDir = "content/de"
+    languageName = "Deutsch"
+    weight = 1
+  [languages.en]
+    title = 'Freshmen welcome 2022'
+    contentDir = "content/en"
+    languageName = "English"
+    weight = 2
+
